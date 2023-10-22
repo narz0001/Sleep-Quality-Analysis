@@ -43,3 +43,6 @@
    - Knowledge of information through data and its representation in graphs
    
    - Know the parts that are not clear in the data in its normal form
+
+<a id="1"></a>
+# <p style="padding:10px;background-color:#4A235A ;margin:0;color:#E2EEF3;font-family:newtimeroman;font-size:100%;text-align:center;border-radius: 15px 50px;overflow:hidden;font-weight:500">The purpose of the project 🔐</p>
