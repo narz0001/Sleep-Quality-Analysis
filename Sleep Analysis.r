@@ -66,3 +66,23 @@ for (col in colnames(df)) {
   }
 }
 #Doesn't seem like there is normal distribution in any variable except for Age - which is almost uniform
+
+#--------------------------------------------------------------------------------------------------------
+
+#Plots to get a better idea of relationship of Quality of Sleep with different parameters
+generate_Box_and_BarPlot = function(X){
+  #BoxPlot to check Quality of Sleep Distribution amongst various parameters
+  boxplot(as.formula(paste("Quality.of.Sleep ~", X)), data = df,
+          main = paste("Distribution of Quality of Sleep by",X), xlab = X, ylab = "Quality of Sleep")
+  
+  #BoxPlot to check Quality of Sleep Distribution amongst various parameters
+  table_data <- table(df$Quality.of.Sleep, df[[X]])
+  barplot(table_data, beside = TRUE, legend.text = rownames(table_data),
+          main = paste("Distribution of Quality of Sleep by",X), xlab = X, ylab = "Count",
+          args.legend = list(x = "topleft", bty = "n"))
+  text(barplot(table_data, beside = TRUE, plot = FALSE), table_data + 1, labels = table_data, cex = 1, pos=3)
+}
+for (col in colnames(df)[-which(colnames(df) == "Quality.of.Sleep")]) {
+  dev.new()
+  generate_Box_and_BarPlot(col)
+}
