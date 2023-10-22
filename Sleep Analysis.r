@@ -51,3 +51,18 @@ col_names <- names(df)
 df <- df[, c(col_names[-qos_index], "Quality.of.Sleep")]
 
 #--------------------------------------------------------------------------------------------------------
+
+#Checking normal distribution:
+#   1. Histogram for Numeric
+#   2. Barplot for Categorical
+for (col in colnames(df)) {
+  #For storing each chart separately
+  dev.new()
+  if (is.factor(df[[col]])) {
+    freq_table <- table(df[[col]])
+    barplot(freq_table, main = paste("Frequency of", col), xlab = col, ylab = "Frequency")
+  } else if (is.numeric(df[[col]])) {
+    hist(df[[col]], main = paste("Histogram of", col), xlab = col, ylab = "Frequency")
+  }
+}
+#Doesn't seem like there is normal distribution in any variable except for Age - which is almost uniform
