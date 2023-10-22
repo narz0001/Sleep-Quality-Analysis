@@ -86,3 +86,28 @@ for (col in colnames(df)[-which(colnames(df) == "Quality.of.Sleep")]) {
   dev.new()
   generate_Box_and_BarPlot(col)
 }
+
+########################### Data Processing ##################################
+#Extracting categorical columns
+categorical_columns <- sapply(df, is.factor)
+print(categorical_columns)
+
+# One-hot encoding for categorical variables
+df_encoded <- predict(dummyVars(~., data = df[categorical_columns,]), newdata = df)
+
+# Correlation matrix - For All Pairs
+cor_matrix <- cor(df_encoded)
+print(cor_matrix)
+
+# Threshold for removing highly correlated columns
+threshold <- 0.8
+
+# Find the columns with correlations exceeding the threshold
+high_cor_columns <- which(abs(cor_matrix) > threshold & row(cor_matrix) != col(cor_matrix), arr.ind = TRUE)
+
+# Identify and remove the redundant columns
+redundant_columns <- unique(high_cor_columns[, "col"])
+print(ncol(redundant_columns)) 
+
+#No redundant columns
+df_encoded <- df_encoded[, -redundant_columns]
