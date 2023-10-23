@@ -3,6 +3,9 @@ rm(list = ls())
 #--------------------------------------------------------------------------------------------------------
 
 library(caret) #For One-Hot Encoding
+library(ggplot2) #For Beautiful Graphs
+library(dplyr) #For Data Manipulation (Graph Plotting)
+library(stringr) #For String Manipulation (Graph Plotting)
 
 #--------------------------------------------------------------------------------------------------------
 #Filepath - Change accordingly
@@ -70,20 +73,41 @@ for (col in colnames(df)) {
 #--------------------------------------------------------------------------------------------------------
 
 #Plots to get a better idea of relationship of Quality of Sleep with different parameters
-generate_Box_and_BarPlot = function(X){
-  #BoxPlot to check Quality of Sleep Distribution amongst various parameters
-  boxplot(as.formula(paste("Quality.of.Sleep ~", X)), data = df,
-          main = paste("Distribution of Quality of Sleep by",X), xlab = X, ylab = "Quality of Sleep")
+generate_Box_and_BarPlot = function(X) {
+  # Create a boxplot using ggplot2
+  box_data <- data.frame(Quality.of.Sleep = df$Quality.of.Sleep, Variable = df[[X]])
+  boxplot_plot <- ggplot(box_data, aes(x = Variable, y = Quality.of.Sleep, fill = Variable)) +
+    geom_boxplot() +
+    labs(title = paste("Distribution of Quality of Sleep by", X),
+         x = X, y = "Quality of Sleep") +
+    scale_fill_brewer(palette = "Set1") +  # Set color palette
+    theme_minimal()  # Apply a minimal theme
   
-  #BoxPlot to check Quality of Sleep Distribution amongst various parameters
-  table_data <- table(df$Quality.of.Sleep, df[[X]])
-  barplot(table_data, beside = TRUE, legend.text = rownames(table_data),
-          main = paste("Distribution of Quality of Sleep by",X), xlab = X, ylab = "Count",
-          args.legend = list(x = "topleft", bty = "n"))
-  text(barplot(table_data, beside = TRUE, plot = FALSE), table_data + 1, labels = table_data, cex = 1, pos=3)
+  # Create a barplot using ggplot2
+  table_data <- as.data.frame(table(df$Quality.of.Sleep, df[[X]]))
+  colnames(table_data) <- c("Quality.of.Sleep", "Variable", "Count")
+  barplot_plot <- ggplot(table_data, aes(x = Variable, y = Count, fill = Variable)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = paste("Distribution of Quality of Sleep by", X),
+         x = X, y = "Count") +
+    scale_fill_brewer(palette = "Set2") +  # Set color palette
+    theme_minimal()  # Apply a minimal theme
+  
+  # Create a new folder if it doesn't exist
+  if (!file.exists("Bar and Box Plots")) {
+    dir.create("Bar and Box Plots")
+  }
+  
+  # Set the filename for saving the plots
+  filename <- str_replace_all(X, " ", "_")
+  
+  # Save the plots as PNG files
+  ggsave(filename = paste("Bar and Box Plots/", filename, ".png", sep = ""), boxplot_plot, width = 6, height = 4)
+  ggsave(filename = paste("Bar and Box Plots/", filename, "_barplot.png", sep = ""), barplot_plot, width = 6, height = 4)
 }
+
+# Loop through each column (excluding "Quality.of.Sleep")
 for (col in colnames(df)[-which(colnames(df) == "Quality.of.Sleep")]) {
-  dev.new()
   generate_Box_and_BarPlot(col)
 }
 
@@ -95,7 +119,7 @@ print(categorical_columns)
 # One-hot encoding for categorical variables
 df_encoded <- predict(dummyVars(~., data = df[categorical_columns,]), newdata = df)
 
-# Correlation matrix - For All Pairs
+# Correlation matrix
 cor_matrix <- cor(df_encoded)
 print(cor_matrix)
 
