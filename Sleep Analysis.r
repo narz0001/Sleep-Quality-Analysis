@@ -6,12 +6,38 @@ library(caret) #For One-Hot Encoding
 library(ggplot2) #For Beautiful Graphs
 library(dplyr) #For Data Manipulation (Graph Plotting)
 library(stringr) #For String Manipulation (Graph Plotting)
+library(tidyr) #For Data Cleaning
 
-#--------------------------------------------------------------------------------------------------------
+################################ Data Cleaning ################################
 #Filepath - Change accordingly
 path = "/Users/geolangsatnarzary/Study - NTU_NBS/6005 - Statistical/Group Assignment - 3/"
 setwd(path)
 df = read.csv("Sleep_health_and_lifestyle_dataset.csv")
+
+str(df)
+
+## Dropping irrelevant columns
+df = subset(df, select = -c(Sleep.Disorder,Daily.Steps))
+
+## Binning Quality of sleep
+df$Quality.of.Sleep = ifelse(df$Quality.of.Sleep<=4, "low", df$Quality.of.Sleep)
+df$Quality.of.Sleep = ifelse(df$Quality.of.Sleep>4 & df$Quality.of.Sleep<8, "medium", df$Quality.of.Sleep)
+df$Quality.of.Sleep = ifelse(df$Quality.of.Sleep==8 | df$Quality.of.Sleep==9 | df$Quality.of.Sleep==10, "high", df$Quality.of.Sleep)
+
+## Binning Stress level
+df$Stress.Level = ifelse(df$Stress.Level<=4, "low", df$Stress.Level)
+df$Stress.Level = ifelse(df$Stress.Level>4 & df$Stress.Level<8, "medium", df$Stress.Level)
+df$Stress.Level = ifelse(df$Stress.Level==8 | df$Stress.Level==9 | df$Stress.Level==10, "high", df$Stress.Level)
+
+## Cleaning BMI.Category column
+df$BMI.Category = ifelse(df$BMI.Category == "Normal Weight", "Normal", df$BMI.Category)
+
+## Splitting Blood Pressure into two columns
+df = separate(df, Blood.Pressure, into = c("BP.Upper.Limit", "BP.Lower.Limit"), sep = "/")
+
+write.csv(df, "Sleep_Final.csv", row.names=FALSE)
+
+#--------------------------------------------------------------------------------------------------------
 
 #Statistical Inferences
 cat("Dataset Structure:\n")
