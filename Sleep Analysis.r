@@ -59,13 +59,33 @@ df <- df[, c(col_names[-qos_index], "Quality.of.Sleep")]
 #   1. Histogram for Numeric
 #   2. Barplot for Categorical
 for (col in colnames(df)) {
-  #For storing each chart separately
-  dev.new()
   if (is.factor(df[[col]])) {
     freq_table <- table(df[[col]])
-    barplot(freq_table, main = paste("Frequency of", col), xlab = col, ylab = "Frequency")
+    data <- data.frame(Variable = names(freq_table), Frequency = as.numeric(freq_table))
+    
+    p <- ggplot(data, aes(x = Variable, y = Frequency)) +
+      geom_bar(stat = "identity", fill = "skyblue") +
+      labs(title = paste("Frequency of", col), x = col, y = "Frequency") +
+      theme_minimal()
+    
+    # Creating directory to store images
+    if (!file.exists("Histogram and Barplot")) {
+      dir.create("Histogram and Barplot")
+    }
+    
+    ggsave(filename = paste("Histogram and Barplot/", paste(col, "Barplot.png"), sep = ""), plot = p)
   } else if (is.numeric(df[[col]])) {
-    hist(df[[col]], main = paste("Histogram of", col), xlab = col, ylab = "Frequency")
+    p <- ggplot(df, aes(x = .data[[col]])) +
+      geom_histogram(binwidth = 1, fill = "skyblue") +
+      labs(title = paste("Histogram of", col), x = col, y = "Frequency") +
+      theme_minimal()
+    
+    # Creating directory to store images
+    if (!file.exists("Histogram and Barplot")) {
+      dir.create("Histogram and Barplot")
+    }
+    
+    ggsave(filename = paste("Histogram and Barplot/", paste(col, "Histogram.png"), sep = ""), plot = p)
   }
 }
 #Doesn't seem like there is normal distribution in any variable except for Age - which is almost uniform
@@ -74,39 +94,39 @@ for (col in colnames(df)) {
 
 #Plots to get a better idea of relationship of Quality of Sleep with different parameters
 generate_Box_and_BarPlot = function(X) {
-  # Create a boxplot using ggplot2
+  #Boxplot
   box_data <- data.frame(Quality.of.Sleep = df$Quality.of.Sleep, Variable = df[[X]])
   boxplot_plot <- ggplot(box_data, aes(x = Variable, y = Quality.of.Sleep, fill = Variable)) +
     geom_boxplot() +
     labs(title = paste("Distribution of Quality of Sleep by", X),
          x = X, y = "Quality of Sleep") +
-    scale_fill_brewer(palette = "Set1") +  # Set color palette
-    theme_minimal()  # Apply a minimal theme
+    scale_fill_brewer(palette = "Set1") +  
+    theme_minimal() 
   
-  # Create a barplot using ggplot2
+  #Barplot
   table_data <- as.data.frame(table(df$Quality.of.Sleep, df[[X]]))
   colnames(table_data) <- c("Quality.of.Sleep", "Variable", "Count")
   barplot_plot <- ggplot(table_data, aes(x = Variable, y = Count, fill = Variable)) +
     geom_bar(stat = "identity", position = "dodge") +
     labs(title = paste("Distribution of Quality of Sleep by", X),
          x = X, y = "Count") +
-    scale_fill_brewer(palette = "Set2") +  # Set color palette
-    theme_minimal()  # Apply a minimal theme
+    scale_fill_brewer(palette = "Set2") +  
+    theme_minimal()
   
-  # Create a new folder if it doesn't exist
+  #Creating directory to store images
   if (!file.exists("Bar and Box Plots")) {
     dir.create("Bar and Box Plots")
   }
   
-  # Set the filename for saving the plots
+  #Filename according to the variable name
   filename <- str_replace_all(X, " ", "_")
   
-  # Save the plots as PNG files
+  #Save as PNG files
   ggsave(filename = paste("Bar and Box Plots/", filename, ".png", sep = ""), boxplot_plot, width = 6, height = 4)
   ggsave(filename = paste("Bar and Box Plots/", filename, "_barplot.png", sep = ""), barplot_plot, width = 6, height = 4)
 }
 
-# Loop through each column (excluding "Quality.of.Sleep")
+#Looping through all variables except Target variable
 for (col in colnames(df)[-which(colnames(df) == "Quality.of.Sleep")]) {
   generate_Box_and_BarPlot(col)
 }
