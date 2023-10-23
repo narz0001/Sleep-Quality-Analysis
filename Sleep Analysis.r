@@ -74,10 +74,11 @@ for (i in 1:ncol(df)) {
 
 #--------------------------------------------------------------------------------------------------------
 
-#Moving Target Variable - Quality of Sleep to the end of the DataFrame
-qos_index <- which(names(df) == "Quality.of.Sleep")
+#Moving Target Variable - Stress Level to the end of the DataFrame
+target_variable <- "Stress.Level"
+qos_index <- which(names(df) == target_variable)
 col_names <- names(df)
-df <- df[, c(col_names[-qos_index], "Quality.of.Sleep")]
+df <- df[, c(col_names[-qos_index], target_variable)]
 
 #--------------------------------------------------------------------------------------------------------
 
@@ -121,20 +122,20 @@ for (col in colnames(df)) {
 #Plots to get a better idea of relationship of Quality of Sleep with different parameters
 generate_Box_and_BarPlot = function(X) {
   #Boxplot
-  box_data <- data.frame(Quality.of.Sleep = df$Quality.of.Sleep, Variable = df[[X]])
-  boxplot_plot <- ggplot(box_data, aes(x = Variable, y = Quality.of.Sleep, fill = Variable)) +
+  box_data <- data.frame(Stress.Level = df$Stress.Level, Variable = df[[X]])
+  boxplot_plot <- ggplot(box_data, aes(x = Variable, y = target_variable, fill = Variable)) +
     geom_boxplot() +
-    labs(title = paste("Distribution of Quality of Sleep by", X),
-         x = X, y = "Quality of Sleep") +
+    labs(title = paste("Distribution of", target_variable, "by", X),
+         x = X, y = target_variable) +
     scale_fill_brewer(palette = "Set1") +  
     theme_minimal() 
   
   #Barplot
-  table_data <- as.data.frame(table(df$Quality.of.Sleep, df[[X]]))
-  colnames(table_data) <- c("Quality.of.Sleep", "Variable", "Count")
+  table_data <- as.data.frame(table(df$Stress.Level, df[[X]]))
+  colnames(table_data) <- c(target_variable, "Variable", "Count")
   barplot_plot <- ggplot(table_data, aes(x = Variable, y = Count, fill = Variable)) +
     geom_bar(stat = "identity", position = "dodge") +
-    labs(title = paste("Distribution of Quality of Sleep by", X),
+    labs(title = paste("Distribution of", target_variable, "by", X),
          x = X, y = "Count") +
     scale_fill_brewer(palette = "Set2") +  
     theme_minimal()
@@ -153,7 +154,7 @@ generate_Box_and_BarPlot = function(X) {
 }
 
 #Looping through all variables except Target variable
-for (col in colnames(df)[-which(colnames(df) == "Quality.of.Sleep")]) {
+for (col in colnames(df)[-which(colnames(df) == target_variable)]) {
   generate_Box_and_BarPlot(col)
 }
 
